@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { getProducts } from './product.handlers'
-import { authMiddleware } from '@/middlewares/auth.middleware'
+import { authMiddleware } from '../../middlewares/auth.middleware'
 
 const router = Router()
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { supabase } from '@/config/supabase'
+import { supabase } from '../config/supabase'
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.replace('Bearer ', '')
