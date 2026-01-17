@@ -4,7 +4,7 @@ export const fetchBusinesses = async () => {
   const { data, error } = await supabase
     .from('business')
     .select('*')
-    .eq('is_active', true)
+    // .eq('is_active', true)
   
   if (error) throw error
   return data
