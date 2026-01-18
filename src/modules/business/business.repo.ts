@@ -35,11 +35,12 @@ export const createBusiness = async (data: { name: string; slug: string }) => {
 
 export const updateBusiness = async (id: string, updates: { name?: string; slug?: string }) => {
   const { data, error } = await supabase
-    .from('business')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    // .single()
+  .from('business')
+  .update(updates)
+  .eq('id', id)
+  .select()
+  // .single()
+  // console.log(data, error)
   
   if (error) throw error
   return data
