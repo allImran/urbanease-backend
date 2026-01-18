@@ -32,7 +32,7 @@ router.post(
 
 // DELETE /api/files/:path
 router.delete(
-  '/:path(*)',
+  /^\/(.*)/,
   authMiddleware,
   requireRole(['admin']),
   deleteFileHandler

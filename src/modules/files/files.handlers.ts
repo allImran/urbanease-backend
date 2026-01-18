@@ -45,7 +45,7 @@ export const uploadFileHandler = async (req: Request, res: Response, next: NextF
 
 export const deleteFileHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const filePath = req.params.path as string
+    const filePath = req.params[0] as string
     if (!filePath) {
       res.status(400).json({ error: 'File path is required' })
       return
