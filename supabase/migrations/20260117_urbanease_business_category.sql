@@ -45,3 +45,59 @@ create trigger on_category_updated
   before update on public.category
   for each row
   execute procedure public.handle_updated_at();
+
+-- Policies for business table
+
+-- Read: Public
+create policy "Public can view businesses"
+  on public.business for select
+  using ( true );
+
+-- Create: Admin and Staff
+create policy "Admin and Staff can create businesses"
+  on public.business for insert
+  with check ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'staff')
+  );
+
+-- Update: Admin and Staff
+create policy "Admin and Staff can update businesses"
+  on public.business for update
+  using ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'staff')
+  );
+
+-- Delete: Admin only
+create policy "Admin can delete businesses"
+  on public.business for delete
+  using ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+  );
+
+-- Policies for category table
+
+-- Read: Public
+create policy "Public can view categories"
+  on public.category for select
+  using ( true );
+
+-- Create: Admin and Staff
+create policy "Admin and Staff can create categories"
+  on public.category for insert
+  with check ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'staff')
+  );
+
+-- Update: Admin and Staff
+create policy "Admin and Staff can update categories"
+  on public.category for update
+  using ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'staff')
+  );
+
+-- Delete: Admin only
+create policy "Admin can delete categories"
+  on public.category for delete
+  using ( 
+    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+  );

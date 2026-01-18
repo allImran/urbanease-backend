@@ -39,7 +39,7 @@ export const updateBusiness = async (id: string, updates: { name?: string; slug?
     .update(updates)
     .eq('id', id)
     .select()
-    .single()
+    // .single()
   
   if (error) throw error
   return data
