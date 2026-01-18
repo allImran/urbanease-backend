@@ -125,3 +125,110 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 
 - **Auth**: Admin only
 - **Description**: Soft deletes the category (sets `is_active` to false).
+
+---
+
+## Product API
+
+### Get All Products
+
+`GET /products`
+
+- **Auth**: Public
+- **Response**: Array of Product objects with nested Category.
+
+### Get Product by ID
+
+`GET /products/:id`
+
+- **Auth**: Public
+- **Response**: Product object with nested Category and Variants.
+
+### Create Product
+
+`POST /products`
+
+- **Auth**: Admin, Staff
+- **Body**:
+  ```json
+  {
+    "name": "Product Name",
+    "slug": "product-slug",
+    "image_urls": ["url1", "url2"], // optional
+    "sections": [{ "type": "text", "content": "..." }], // optional JSONB
+    "category_id": "uuid"
+  }
+  ```
+- **Response**: Created Product object.
+
+### Update Product
+
+`PUT /products/:id`
+
+- **Auth**: Admin, Staff
+- **Body**:
+  ```json
+  {
+    "name": "Updated Name",
+    "slug": "updated-slug",
+    "image_urls": ["url1"],
+    "sections": []
+  }
+  ```
+- **Response**: Updated Product object.
+
+### Delete Product
+
+`DELETE /products/:id`
+
+- **Auth**: Admin only
+- **Response**: 204 No Content
+
+---
+
+## Product Variant API
+
+### Get Variants by Product ID
+
+`GET /products/:id/variants`
+
+- **Auth**: Public
+- **Response**: Array of Variant objects.
+
+### Create Variant
+
+`POST /products/:id/variants`
+
+- **Auth**: Admin, Staff
+- **Body**:
+  ```json
+  {
+    "sku": "SKU-123",
+    "price": 99.99,
+    "attributes": { "color": "blue", "size": "M" },
+    "product_id": "uuid" // included in body validation but url param used for association
+  }
+  ```
+- **Response**: Created Variant object.
+
+### Update Variant
+
+`PUT /products/variants/:id`
+
+- **Auth**: Admin, Staff
+- **Body**:
+  ```json
+  {
+    "sku": "NEW-SKU",
+    "price": 89.99,
+    "attributes": { "color": "red" }
+  }
+  ```
+- **Response**: Updated Variant object.
+
+### Delete Variant
+
+`DELETE /products/variants/:id`
+
+- **Auth**: Admin only
+- **Response**: 204 No Content
