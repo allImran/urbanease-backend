@@ -27,7 +27,7 @@ export interface ProductVariant {
 export const fetchProducts = async () => {
   const { data, error } = await supabase
     .from('products')
-    .select('*, category:categories(*)')
+    .select('*, category:category(*)')
   
   if (error) throw error
   return data
@@ -36,7 +36,7 @@ export const fetchProducts = async () => {
 export const fetchProductById = async (id: string) => {
   const { data, error } = await supabase
     .from('products')
-    .select('*, category:categories(*), variants:product_variants(*)')
+    .select('*, category:category(*), variants:product_variants(*)')
     .eq('id', id)
     .single()
   

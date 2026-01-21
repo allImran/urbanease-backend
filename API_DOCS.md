@@ -232,3 +232,39 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 
 - **Auth**: Admin only
 - **Response**: 204 No Content
+
+---
+
+## File API
+
+### Upload File
+
+`POST /files/upload`
+
+- **Auth**: Admin, Staff
+- **Body**: `multipart/form-data`
+  - `file`: The file to upload.
+- **Response**:
+  ```json
+  {
+    "url": "https://...",
+    "path": "uploads/...",
+    "size": 12345,
+    "mimetype": "image/jpeg",
+    "filename": "..."
+  }
+  ```
+
+### Delete File
+
+`DELETE /files/:path`
+
+- **Auth**: Admin only
+- **Description**: Deletes a file by its path (e.g., `uploads/image.jpg`). The path parameter can contain slashes.
+- **Response**:
+  ```json
+  {
+    "message": "File deleted successfully",
+    "path": "uploads/..."
+  }
+  ```
