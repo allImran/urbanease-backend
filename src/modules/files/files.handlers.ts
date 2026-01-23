@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../../config/supabase'
-import { v4 as uuidv4 } from 'uuid'
+// import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 
 export const uploadFileHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ export const uploadFileHandler = async (req: Request, res: Response, next: NextF
     const start = Date.now()
     const file = req.file
     const fileExt = path.extname(file.originalname)
-    const fileName = `${Date.now()}-${uuidv4()}${fileExt}`
+    const fileName = `${Date.now()}${fileExt}`
     const filePath = `uploads/${fileName}`
 
     const { data, error } = await supabase.storage
