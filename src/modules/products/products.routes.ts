@@ -6,6 +6,7 @@ import { validate } from '../../middlewares/validate.middleware'
 import {
   getProductsHandler,
   getProductHandler,
+  getProductBySlugHandler,
   createProductHandler,
   updateProductHandler,
   deleteProductHandler,
@@ -21,6 +22,7 @@ const router = Router()
 
 // Public Read Access
 router.get('/', getProductsHandler)
+router.get('/slug/:slug', getProductBySlugHandler)
 router.get('/:id', getProductHandler)
 
 // Admin/Staff Create/Update Access

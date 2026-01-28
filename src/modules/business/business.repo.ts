@@ -1,10 +1,11 @@
 import { supabase } from '../../config/supabase'
 
 export const fetchBusinesses = async () => {
+  //select only active business
   const { data, error } = await supabase
     .from('business')
     .select('*')
-    // .eq('is_active', true)
+    .eq('is_active', true)
   
   if (error) throw error
   return data

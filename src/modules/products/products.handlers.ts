@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import {
   fetchProducts,
   fetchProductById,
+  fetchProductBySlug,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -26,6 +27,17 @@ export const getProductHandler = async (req: Request, res: Response, next: NextF
   try {
     const { id } = req.params
     const product = await fetchProductById(id as string)
+
+    res.json(product)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const getProductBySlugHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { slug } = req.params
+    const product = await fetchProductBySlug(slug as string)
 
     res.json(product)
   } catch (e) {
