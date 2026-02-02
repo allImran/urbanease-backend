@@ -268,3 +268,113 @@ Base URL: `https://urbanease-backend.vercel.app/api`
     "path": "uploads/..."
   }
   ```
+
+---
+
+## Order API
+
+### Create Order
+
+`POST /orders`
+
+- **Auth**: Optional (Guest or Authenticated)
+- **Description**: Creates a new order. If phone number is provided and user doesn't exist, a new customer account is automatically created. The order calculates total amount based on current variant prices and stores price snapshots.
+- **Body**:
+  ```json
+  {
+    "business_id": "uuid",
+    "shipping_address": {
+      "street": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zip": "10001",
+      "country": "USA"
+    },
+    "phone": "+1234567890",
+    "items": [
+      {
+        "product_id": "uuid",
+        "variant_id": "uuid",
+        "quantity": 2
+      }
+    ]
+  }
+  ```
+- **Response**: Created Order object with nested Order Items.
+  ```json
+  {
+    "id": "uuid",
+    "user_id": "uuid",
+    "status": "pending",
+    "total_amount": 199.98,
+    "business_id": "uuid",
+    "shipping_address": { ... },
+    "created_at": "2025-01-15T10:30:00Z",
+    "updated_at": "2025-01-15T10:30:00Z",
+    "order_items": [
+      {
+        "id": "uuid",
+        "product_id": "uuid",
+        "variant_id": "uuid",
+        "quantity": 2,
+        "price_at_purchase": 99.99,
+        "snapshot_name": "Product Name (SKU-123)"
+      }
+    ]
+  }
+  ```
+
+### Get Order by ID
+
+`GET /orders/:id`
+
+- **Auth**: Required
+- **Description**: Retrieves a specific order. Customers can only view their own orders; Admin/Staff can view any order.
+- **Response**: Order object with nested Order Items.
+
+### Get All Orders
+
+`GET /orders`
+
+- **Auth**: Admin, Staff only
+- **Response**: Array of all Order objects.
+
+### Get Orders by Business
+
+`GET /orders/business/:id`
+
+- **Auth**: Admin, Staff only
+- **Query Params**:
+  - `id`: Business UUID
+- **Response**: Array of Order objects for the specified business.
+
+### Update Order Status
+
+`PATCH /orders/:id/status`
+
+- **Auth**: Admin, Staff only
+- **Body**:
+  ```json
+  {
+    "status": "confirmed"
+  }
+  ```
+- **Valid Status Values**: `pending`, `conducted`, `confirmed`, `paid`, `shipped`, `delivered`, `cancelled`, `returned`, `partially_returned`
+- **Response**: Updated Order object.
+
+### Update Order
+
+`PATCH /orders/:id`
+
+- **Auth**: Admin only
+- **Description**: Full order update (all fields optional except validation constraints).
+- **Body**:
+  ```json
+  {
+    "status": "paid",
+    "total_amount": 149.99,
+    "shipping_address": { ... },
+    "payment_intent_id": "pi_1234567890"
+  }
+  ```
+- **Response**: Updated Order object.
