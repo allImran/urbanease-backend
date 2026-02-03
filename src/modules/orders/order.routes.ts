@@ -5,8 +5,7 @@ import { validate } from '../../middlewares/validate.middleware'
 import {
   createOrderValidation,
   updateOrderStatusValidation,
-  updateOrderAdminValidation,
-  includeHistoryValidation
+  updateOrderAdminValidation
 } from './order.validation'
 import {
   getOrdersHandler,
@@ -37,12 +36,9 @@ router.post(
   createOrderHandler
 )
 
-// Get Own Order / Any Order (RBAC checked in handler)
+// Get Order by ID (Public - includes status history)
 router.get(
   '/:id',
-  authMiddleware,
-  includeHistoryValidation,
-  validate,
   getOrderHandler
 )
 

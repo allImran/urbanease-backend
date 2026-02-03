@@ -26,24 +26,11 @@ export const getBusinessOrdersHandler = async (req: Request, res: Response, next
 export const getOrderHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params
-    const { include } = req.query
     const order = await fetchOrderById(id as string)
 
-    // RBAC check: Only Admin/Staff or the owner can view
-    const userRole = (req as any).user?.app_metadata?.role
-    const userId = (req as any).user?.id
-
-    if (userRole === 'customer' && order.user_id !== userId) {
-      return res.status(403).json({ message: 'Forbidden: You do not own this order' })
-    }
-
-    // Optionally include status history
-    if (include === 'history') {
-      const history = await fetchOrderStatusHistory(id as string)
-      res.json({ ...order, history })
-    } else {
-      res.json(order)
-    }
+    // Always include status history
+    const history = await fetchOrderStatusHistory(id as string)
+    res.json({ ...order, history })
   } catch (e) {
     next(e)
   }
@@ -108,7 +95,6 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
     // 3. Create Order
     const order = await createOrder({
       user_id: userId,
-      status: 'pending',
       total_amount: totalAmount,
       business_id,
       shipping_address
