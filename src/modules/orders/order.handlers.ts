@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../../config/supabase'
-import { fetchOrders, fetchOrderById, createOrder, updateOrder } from './order.repo'
+import { fetchOrders, fetchOrderById, createOrder, updateOrder, updateOrderWithHistory, fetchOrderStatusHistory, insertStatusHistory } from './order.repo'
 import { fetchProductById } from '../products/products.repo'
 import { OrderItem } from './order.types'
 
@@ -28,15 +28,9 @@ export const getOrderHandler = async (req: Request, res: Response, next: NextFun
     const { id } = req.params
     const order = await fetchOrderById(id as string)
 
-    // RBAC check: Only Admin/Staff or the owner can view
-    const userRole = (req as any).user?.app_metadata?.role
-    const userId = (req as any).user?.id
-
-    if (userRole === 'customer' && order.user_id !== userId) {
-      return res.status(403).json({ message: 'Forbidden: You do not own this order' })
-    }
-
-    res.json(order)
+    // Always include status history
+    const history = await fetchOrderStatusHistory(id as string)
+    res.json({ ...order, history })
   } catch (e) {
     next(e)
   }
@@ -101,11 +95,13 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
     // 3. Create Order
     const order = await createOrder({
       user_id: userId,
-      status: 'pending',
       total_amount: totalAmount,
       business_id,
       shipping_address
     }, orderItems)
+
+    // 4. Record initial status in history
+    await insertStatusHistory(order.id, 'pending')
 
     res.status(201).json(order)
   } catch (e) {
@@ -116,8 +112,8 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
 export const updateOrderStatusHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params
-    const { status } = req.body
-    const order = await updateOrder(id as string, { status })
+    const { status, comment } = req.body
+    const order = await updateOrderWithHistory(id as string, status, comment)
     res.json(order)
   } catch (e) {
     next(e)
@@ -129,6 +125,31 @@ export const updateOrderHandler = async (req: Request, res: Response, next: Next
     const { id } = req.params
     const order = await updateOrder(id as string, req.body)
     res.json(order)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const getOrderStatusHistoryHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+
+    // First check if user has access to the order
+    const order = await fetchOrderById(id as string)
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
+    }
+
+    // RBAC check: Only Admin/Staff or the owner can view history
+    const userRole = (req as any).user?.app_metadata?.role
+    const userId = (req as any).user?.id
+
+    if (userRole === 'customer' && order.user_id !== userId) {
+      return res.status(403).json({ message: 'Forbidden: You do not own this order' })
+    }
+
+    const history = await fetchOrderStatusHistory(id as string)
+    res.json(history)
   } catch (e) {
     next(e)
   }

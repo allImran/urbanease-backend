@@ -1,5 +1,5 @@
 import { supabase } from '../../config/supabase'
-import { Order, OrderItem, UpdateOrderDTO } from './order.types'
+import { Order, OrderItem, OrderStatus, OrderStatusHistory, UpdateOrderDTO } from './order.types'
 
 export const fetchOrders = async (filters: { user_id?: string; business_id?: string } = {}) => {
   let query = supabase.from('orders').select('*, order_items(*)')
@@ -59,4 +59,52 @@ export const updateOrder = async (id: string, updates: UpdateOrderDTO) => {
 
   if (error) throw error
   return data
+}
+
+// Status History Functions
+
+export const insertStatusHistory = async (
+  orderId: string,
+  status: OrderStatus,
+  comment?: string
+): Promise<OrderStatusHistory> => {
+  const { data, error } = await supabase
+    .from('order_status_history')
+    .insert({
+      order_id: orderId,
+      status,
+      comment: comment || null,
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export const fetchOrderStatusHistory = async (
+  orderId: string
+): Promise<OrderStatusHistory[]> => {
+  const { data, error } = await supabase
+    .from('order_status_history')
+    .select('*')
+    .eq('order_id', orderId)
+    .order('changed_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const updateOrderWithHistory = async (
+  id: string,
+  status: OrderStatus,
+  comment?: string
+) => {
+  // First, update the order status
+  const order = await updateOrder(id, { status })
+
+  // Then, record the history
+  await insertStatusHistory(id, status, comment)
+
+  return order
 }

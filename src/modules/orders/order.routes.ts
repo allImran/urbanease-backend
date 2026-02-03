@@ -13,7 +13,8 @@ import {
   getOrderHandler,
   createOrderHandler,
   updateOrderStatusHandler,
-  updateOrderHandler
+  updateOrderHandler,
+  getOrderStatusHistoryHandler
 } from './order.handlers'
 
 const router = Router()
@@ -35,11 +36,17 @@ router.post(
   createOrderHandler
 )
 
-// Get Own Order / Any Order (RBAC checked in handler)
+// Get Order by ID (Public - includes status history)
 router.get(
   '/:id',
-//   authMiddleware,
   getOrderHandler
+)
+
+// Get Order Status History (RBAC checked in handler)
+router.get(
+  '/:id/history',
+  authMiddleware,
+  getOrderStatusHistoryHandler
 )
 
 // --- Admin / Staff Only ---

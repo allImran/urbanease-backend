@@ -1,13 +1,21 @@
-export type OrderStatus = 
-  | 'pending' 
-  | 'conducted' 
-  | 'confirmed' 
-  | 'paid' 
-  | 'shipped' 
-  | 'delivered' 
-  | 'cancelled' 
-  | 'returned' 
+export type OrderStatus =
+  | 'pending'
+  | 'conducted'
+  | 'confirmed'
+  | 'paid'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned'
   | 'partially_returned';
+
+export interface OrderStatusHistory {
+  id: string;
+  order_id: string;
+  status: OrderStatus;
+  changed_at: string;
+  comment: string | null;
+}
 
 export interface Order {
   id: string;
@@ -19,6 +27,7 @@ export interface Order {
   payment_intent_id?: string;
   created_at: string;
   updated_at: string;
+  history?: OrderStatusHistory[];
 }
 
 export interface OrderItem {
@@ -45,3 +54,8 @@ export interface CreateOrderDTO {
 }
 
 export interface UpdateOrderDTO extends Partial<Omit<Order, 'id' | 'created_at' | 'updated_at'>> {}
+
+export interface UpdateOrderStatusDTO {
+  status: OrderStatus;
+  comment?: string;
+}
