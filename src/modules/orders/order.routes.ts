@@ -5,7 +5,8 @@ import { validate } from '../../middlewares/validate.middleware'
 import {
   createOrderValidation,
   updateOrderStatusValidation,
-  updateOrderAdminValidation
+  updateOrderAdminValidation,
+  includeHistoryValidation
 } from './order.validation'
 import {
   getOrdersHandler,
@@ -13,7 +14,8 @@ import {
   getOrderHandler,
   createOrderHandler,
   updateOrderStatusHandler,
-  updateOrderHandler
+  updateOrderHandler,
+  getOrderStatusHistoryHandler
 } from './order.handlers'
 
 const router = Router()
@@ -39,7 +41,16 @@ router.post(
 router.get(
   '/:id',
   authMiddleware,
+  includeHistoryValidation,
+  validate,
   getOrderHandler
+)
+
+// Get Order Status History (RBAC checked in handler)
+router.get(
+  '/:id/history',
+  authMiddleware,
+  getOrderStatusHistoryHandler
 )
 
 // --- Admin / Staff Only ---
