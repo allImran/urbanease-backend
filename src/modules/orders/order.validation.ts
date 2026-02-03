@@ -1,4 +1,4 @@
-import { body, query } from 'express-validator'
+import { body } from 'express-validator'
 
 export const createOrderValidation = [
   body('business_id').isUUID().withMessage('Business ID must be a valid UUID'),
@@ -15,10 +15,6 @@ export const updateOrderStatusValidation = [
     'pending', 'conducted', 'confirmed', 'paid', 'shipped', 'delivered', 'cancelled', 'returned', 'partially_returned'
   ]).withMessage('Invalid order status'),
   body('comment').optional().isString().withMessage('Comment must be a string')
-]
-
-export const includeHistoryValidation = [
-  query('include').optional().isIn(['history']).withMessage('Include must be "history"')
 ]
 
 export const updateOrderAdminValidation = [

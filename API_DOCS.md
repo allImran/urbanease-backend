@@ -328,9 +328,66 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 
 `GET /orders/:id`
 
+- **Auth**: Public
+- **Description**: Retrieves a specific order with its status history. No authentication required.
+- **Response**: Order object with nested Order Items and status history.
+  ```json
+  {
+    "id": "uuid",
+    "user_id": "uuid",
+    "status": "pending",
+    "total_amount": 199.98,
+    "business_id": "uuid",
+    "shipping_address": { ... },
+    "created_at": "2025-01-15T10:30:00Z",
+    "updated_at": "2025-01-15T10:30:00Z",
+    "order_items": [
+      {
+        "id": "uuid",
+        "product_id": "uuid",
+        "variant_id": "uuid",
+        "quantity": 2,
+        "price_at_purchase": 99.99,
+        "snapshot_name": "Product Name (SKU-123)"
+      }
+    ],
+    "history": [
+      {
+        "id": "uuid",
+        "order_id": "uuid",
+        "status": "pending",
+        "comment": null,
+        "changed_at": "2025-01-15T10:30:00Z"
+      }
+    ]
+  }
+  ```
+
+### Get Order Status History
+
+`GET /orders/:id/history`
+
 - **Auth**: Required
-- **Description**: Retrieves a specific order. Customers can only view their own orders; Admin/Staff can view any order.
-- **Response**: Order object with nested Order Items.
+- **Description**: Retrieves the status history for a specific order. Customers can only view their own order history; Admin/Staff can view any order's history.
+- **Response**: Array of status history entries ordered by most recent first.
+  ```json
+  [
+    {
+      "id": "uuid",
+      "order_id": "uuid",
+      "status": "confirmed",
+      "comment": "Order confirmed by staff",
+      "changed_at": "2025-01-15T11:00:00Z"
+    },
+    {
+      "id": "uuid",
+      "order_id": "uuid",
+      "status": "pending",
+      "comment": null,
+      "changed_at": "2025-01-15T10:30:00Z"
+    }
+  ]
+  ```
 
 ### Get All Orders
 
