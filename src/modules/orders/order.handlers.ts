@@ -28,9 +28,20 @@ export const getOrderHandler = async (req: Request, res: Response, next: NextFun
     const { id } = req.params
     const order = await fetchOrderById(id as string)
 
+    // Fetch full product details for each order item
+    const orderItemsWithProducts = await Promise.all(
+      (order.order_items || []).map(async (item: any) => {
+        const product = await fetchProductById(item.product_id)
+        return {
+          ...item,
+          product
+        }
+      })
+    )
+
     // Always include status history
     const history = await fetchOrderStatusHistory(id as string)
-    res.json({ ...order, history })
+    res.json({ ...order, order_items: orderItemsWithProducts, history })
   } catch (e) {
     next(e)
   }
