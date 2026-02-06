@@ -7,7 +7,16 @@ import { OrderItem } from './order.types'
 export const getOrdersHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orders = await fetchOrders()
-    res.json(orders)
+
+    // Include status history for each order
+    const ordersWithHistory = await Promise.all(
+      orders.map(async (order: any) => {
+        const history = await fetchOrderStatusHistory(order.id)
+        return { ...order, history }
+      })
+    )
+
+    res.json(ordersWithHistory)
   } catch (e) {
     next(e)
   }
@@ -17,7 +26,16 @@ export const getBusinessOrdersHandler = async (req: Request, res: Response, next
   try {
     const { id: businessId } = req.params
     const orders = await fetchOrders({ business_id: businessId as string })
-    res.json(orders)
+
+    // Include status history for each order
+    const ordersWithHistory = await Promise.all(
+      orders.map(async (order: any) => {
+        const history = await fetchOrderStatusHistory(order.id)
+        return { ...order, history }
+      })
+    )
+
+    res.json(ordersWithHistory)
   } catch (e) {
     next(e)
   }
