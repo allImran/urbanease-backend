@@ -1,6 +1,12 @@
 import { supabase } from '../../config/supabase'
 import { Order, OrderItem, OrderStatus, OrderStatusHistory, UpdateOrderDTO } from './order.types'
 
+// Helper to derive current status from history (latest entry)
+const deriveCurrentStatus = (history: OrderStatusHistory[]): OrderStatus | undefined => {
+  if (!history || history.length === 0) return undefined
+  return history[0]?.status
+}
+
 export const fetchOrders = async (filters: { user_id?: string; business_id?: string } = {}) => {
   let query = supabase.from('orders').select('*, order_items(*)')
 
@@ -100,11 +106,10 @@ export const updateOrderWithHistory = async (
   status: OrderStatus,
   comment?: string
 ) => {
-  // First, update the order status
-  const order = await updateOrder(id, { status })
-
-  // Then, record the history
+  // Record the history - status is derived from history, not stored on order
   await insertStatusHistory(id, status, comment)
 
+  // Return the updated order (fetch fresh to get latest state)
+  const order = await fetchOrderById(id)
   return order
 }

@@ -18,9 +18,7 @@ export const updateOrderStatusValidation = [
 ]
 
 export const updateOrderAdminValidation = [
-  body('status').optional().isIn([
-    'pending', 'conducted', 'confirmed', 'paid', 'shipped', 'delivered', 'cancelled', 'returned', 'partially_returned'
-  ]).withMessage('Invalid order status'),
+  // Status is managed via history, not directly on order
   body('total_amount').optional().isNumeric().withMessage('Total amount must be a number'),
   body('shipping_address').optional().notEmpty().withMessage('Shipping address cannot be empty'),
   body('payment_intent_id').optional().isString().withMessage('Payment intent ID must be a string')

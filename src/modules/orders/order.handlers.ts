@@ -2,17 +2,23 @@ import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../../config/supabase'
 import { fetchOrders, fetchOrderById, createOrder, updateOrder, updateOrderWithHistory, fetchOrderStatusHistory, insertStatusHistory } from './order.repo'
 import { fetchProductById } from '../products/products.repo'
-import { OrderItem } from './order.types'
+import { OrderItem, OrderStatus } from './order.types'
+
+// Helper to derive current status from history (latest entry)
+const deriveCurrentStatus = (history: any[]): OrderStatus | undefined => {
+  if (!history || history.length === 0) return undefined
+  return history[0]?.status
+}
 
 export const getOrdersHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orders = await fetchOrders()
 
-    // Include status history for each order
+    // Include status history for each order and derive current status
     const ordersWithHistory = await Promise.all(
       orders.map(async (order: any) => {
         const history = await fetchOrderStatusHistory(order.id)
-        return { ...order, history }
+        return { ...order, history, status: deriveCurrentStatus(history) }
       })
     )
 
@@ -27,11 +33,11 @@ export const getBusinessOrdersHandler = async (req: Request, res: Response, next
     const { id: businessId } = req.params
     const orders = await fetchOrders({ business_id: businessId as string })
 
-    // Include status history for each order
+    // Include status history for each order and derive current status
     const ordersWithHistory = await Promise.all(
       orders.map(async (order: any) => {
         const history = await fetchOrderStatusHistory(order.id)
-        return { ...order, history }
+        return { ...order, history, status: deriveCurrentStatus(history) }
       })
     )
 
@@ -57,9 +63,9 @@ export const getOrderHandler = async (req: Request, res: Response, next: NextFun
       })
     )
 
-    // Always include status history
+    // Always include status history and derive current status
     const history = await fetchOrderStatusHistory(id as string)
-    res.json({ ...order, order_items: orderItemsWithProducts, history })
+    res.json({ ...order, order_items: orderItemsWithProducts, history, status: deriveCurrentStatus(history) })
   } catch (e) {
     next(e)
   }

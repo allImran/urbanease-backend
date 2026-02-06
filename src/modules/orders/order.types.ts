@@ -20,7 +20,6 @@ export interface OrderStatusHistory {
 export interface Order {
   id: string;
   user_id: string | null;
-  status: OrderStatus;
   total_amount: number;
   business_id: string;
   shipping_address: any;
@@ -28,6 +27,8 @@ export interface Order {
   created_at: string;
   updated_at: string;
   history?: OrderStatusHistory[];
+  // Current status is derived from the latest history entry
+  status?: OrderStatus;
 }
 
 export interface OrderItem {
@@ -53,7 +54,7 @@ export interface CreateOrderDTO {
   }[];
 }
 
-export interface UpdateOrderDTO extends Partial<Omit<Order, 'id' | 'created_at' | 'updated_at'>> {}
+export interface UpdateOrderDTO extends Partial<Omit<Order, 'id' | 'created_at' | 'updated_at' | 'status'>> {}
 
 export interface UpdateOrderStatusDTO {
   status: OrderStatus;
