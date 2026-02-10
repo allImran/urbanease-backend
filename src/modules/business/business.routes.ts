@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { body } from 'express-validator'
 import { authMiddleware } from '../../middlewares/auth.middleware'
 import { requireRole } from '../../middlewares/role.middleware'
 import { validate } from '../../middlewares/validate.middleware'
@@ -10,6 +9,7 @@ import {
   updateBusinessHandler,
   deleteBusinessHandler
 } from './business.handlers'
+import { createBusinessValidation, updateBusinessValidation } from './business.validators'
 
 const router = Router()
 
@@ -18,26 +18,18 @@ router.get('/', getBusinesses)
 router.get('/:id', getBusiness)
 
 router.post(
-  '/', 
-  authMiddleware, 
-  requireRole(['admin']), 
-  [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('slug').notEmpty().withMessage('Slug is required'),
-    validate
-  ],
+  '/',
+  authMiddleware,
+  requireRole(['admin']),
+  [...createBusinessValidation, validate],
   createBusinessHandler
 )
 
 router.put(
-  '/:id', 
-  authMiddleware, 
+  '/:id',
+  authMiddleware,
   requireRole(['admin']),
-  [
-    body('name').optional().notEmpty().withMessage('Name cannot be empty'),
-    body('slug').optional().notEmpty().withMessage('Slug cannot be empty'),
-    validate
-  ],
+  [...updateBusinessValidation, validate],
   updateBusinessHandler
 )
 

@@ -12,6 +12,31 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 
 ## Business API
 
+### Business Object Structure
+
+```typescript
+{
+  "id": "uuid",
+  "name": "string",
+  "slug": "string",
+  "logo": "string | null",        // URL to business logo image
+  "slogan": "string | null",      // Business slogan/tagline
+  "primary_color": "string | null", // Hex color code (e.g., "#FFFFFF")
+  "email": "string | null",       // Contact email
+  "social": {                     // Social media links object
+    "facebook": "string | undefined",
+    "instagram": "string | undefined",
+    "twitter": "string | undefined",
+    "linkedin": "string | undefined",
+    "website": "string | undefined"
+  },
+  "address": "string | null",     // Business address
+  "is_active": true,
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
 ### Get All Businesses
 
 `GET /businesses`
@@ -35,9 +60,30 @@ Base URL: `https://urbanease-backend.vercel.app/api`
   ```json
   {
     "name": "Business Name",
-    "slug": "business-slug"
+    "slug": "business-slug",
+    "logo": "https://example.com/logo.png",
+    "slogan": "Your trusted partner",
+    "primary_color": "#FF5733",
+    "email": "contact@business.com",
+    "social": {
+      "facebook": "https://facebook.com/business",
+      "instagram": "https://instagram.com/business",
+      "twitter": "https://twitter.com/business",
+      "linkedin": "https://linkedin.com/company/business",
+      "website": "https://business.com"
+    },
+    "address": "123 Main St, City, State 12345"
   }
   ```
+- **Validation**:
+  - `name` (required): Non-empty string
+  - `slug` (required): Non-empty string
+  - `logo` (optional): Valid URL
+  - `slogan` (optional): String
+  - `primary_color` (optional): Hex color code (format: `#XXXXXX`)
+  - `email` (optional): Valid email address
+  - `social` (optional): Object with social media links
+  - `address` (optional): String
 - **Response**: Created Business object.
 
 ### Update Business
@@ -49,9 +95,19 @@ Base URL: `https://urbanease-backend.vercel.app/api`
   ```json
   {
     "name": "Updated Name",
-    "slug": "updated-slug"
+    "slug": "updated-slug",
+    "logo": "https://example.com/new-logo.png",
+    "slogan": "New slogan",
+    "primary_color": "#123456",
+    "email": "newemail@business.com",
+    "social": {
+      "facebook": "https://facebook.com/new-business",
+      "instagram": "https://instagram.com/new-business"
+    },
+    "address": "456 New Address, City, State 67890"
   }
   ```
+- **Validation**: Same as Create Business (all fields optional)
 - **Response**: Updated Business object.
 
 ### Delete Business

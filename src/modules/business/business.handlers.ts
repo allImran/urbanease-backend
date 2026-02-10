@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import type { CreateBusinessDTO, UpdateBusinessDTO } from './business.types'
 import {
   fetchBusinesses,
   fetchBusinessById,
@@ -28,12 +29,13 @@ export const getBusiness = async (req: Request, res: Response, next: NextFunctio
 
 export const createBusinessHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, slug } = req.body
+    const { name, slug, logo, slogan, primary_color, email, social, address } = req.body
     if (!name || !slug) {
       res.status(400).json({ error: 'Name and slug are required' })
-      return 
+      return
     }
-    const business = await createBusiness({ name, slug })
+    const businessData: CreateBusinessDTO = { name, slug, logo, slogan, primary_color, email, social, address }
+    const business = await createBusiness(businessData)
     res.status(201).json(business)
   } catch (e) {
     next(e)
@@ -43,8 +45,9 @@ export const createBusinessHandler = async (req: Request, res: Response, next: N
 export const updateBusinessHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params
-    const { name, slug } = req.body
-    const business = await updateBusiness(id as string, { name, slug })
+    const { name, slug, logo, slogan, primary_color, email, social, address } = req.body
+    const updateData: UpdateBusinessDTO = { name, slug, logo, slogan, primary_color, email, social, address }
+    const business = await updateBusiness(id as string, updateData)
     res.json(business)
   } catch (e) {
     next(e)

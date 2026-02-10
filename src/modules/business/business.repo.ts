@@ -1,6 +1,7 @@
 import { supabase } from '../../config/supabase'
+import type { Business, CreateBusinessDTO, UpdateBusinessDTO } from './business.types'
 
-export const fetchBusinesses = async () => {
+export const fetchBusinesses = async (): Promise<Business[]> => {
   //select only active business
   const { data, error } = await supabase
     .from('business')
@@ -11,7 +12,7 @@ export const fetchBusinesses = async () => {
   return data
 }
 
-export const fetchBusinessById = async (id: string) => {
+export const fetchBusinessById = async (id: string): Promise<Business> => {
   const { data, error } = await supabase
     .from('business')
     .select('*')
@@ -23,7 +24,7 @@ export const fetchBusinessById = async (id: string) => {
   return data
 }
 
-export const createBusiness = async (data: { name: string; slug: string }) => {
+export const createBusiness = async (data: CreateBusinessDTO): Promise<Business> => {
   const { data: created, error } = await supabase
     .from('business')
     .insert(data)
@@ -34,7 +35,7 @@ export const createBusiness = async (data: { name: string; slug: string }) => {
   return created
 }
 
-export const updateBusiness = async (id: string, updates: { name?: string; slug?: string }) => {
+export const updateBusiness = async (id: string, updates: UpdateBusinessDTO): Promise<Business[]> => {
   const { data, error } = await supabase
   .from('business')
   .update(updates)
