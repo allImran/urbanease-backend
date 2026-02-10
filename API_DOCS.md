@@ -186,6 +186,22 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 
 ## Product API
 
+### Product Object Structure
+
+```typescript
+{
+  "id": "uuid",
+  "name": "string",
+  "slug": "string",
+  "image_urls": ["string"],        // Array of image URLs
+  "sections": [],                   // JSONB - flexible sections for content layout
+  "category_id": "uuid | null",     // Reference to category
+  "business_id": "uuid",            // Reference to business (required)
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
+}
+```
+
 ### Get All Products
 
 `GET /products`
@@ -210,11 +226,19 @@ Base URL: `https://urbanease-backend.vercel.app/api`
   {
     "name": "Product Name",
     "slug": "product-slug",
-    "image_urls": ["url1", "url2"], // optional
-    "sections": [{ "type": "text", "content": "..." }], // optional JSONB
-    "category_id": "uuid"
+    "image_urls": ["url1", "url2"],
+    "sections": [{ "type": "text", "content": "..." }],
+    "category_id": "uuid",
+    "business_id": "uuid"
   }
   ```
+- **Validation**:
+  - `name` (required): Non-empty string
+  - `slug` (required): Non-empty string
+  - `category_id` (required): Valid UUID
+  - `business_id` (required): Valid UUID
+  - `image_urls` (optional): Array of image URLs
+  - `sections` (optional): JSONB array for content layout
 - **Response**: Created Product object.
 
 ### Update Product
@@ -228,9 +252,12 @@ Base URL: `https://urbanease-backend.vercel.app/api`
     "name": "Updated Name",
     "slug": "updated-slug",
     "image_urls": ["url1"],
-    "sections": []
+    "sections": [],
+    "category_id": "uuid",
+    "business_id": "uuid"
   }
   ```
+- **Validation**: All fields optional, must be valid if provided
 - **Response**: Updated Product object.
 
 ### Delete Product

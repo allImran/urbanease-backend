@@ -8,6 +8,7 @@ export interface Product {
   image_urls: string[]
   sections: any[]
   category_id?: string
+  business_id: string
   created_at: string
   updated_at: string
 }

@@ -34,6 +34,7 @@ router.post(
     body('name').notEmpty().withMessage('Name is required'),
     body('slug').notEmpty().withMessage('Slug is required'),
     body('category_id').notEmpty().withMessage('Category ID is required'),
+    body('business_id').notEmpty().withMessage('Business ID is required').isUUID().withMessage('Business ID must be a valid UUID'),
     validate
   ],
   createProductHandler
