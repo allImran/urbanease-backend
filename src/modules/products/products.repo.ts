@@ -29,7 +29,17 @@ export const fetchProducts = async () => {
   const { data, error } = await supabase
     .from('products')
     .select('*, category:category(*)')
-  
+
+  if (error) throw error
+  return data
+}
+
+export const fetchProductsByBusinessId = async (businessId: string) => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, category:category(*)')
+    .eq('business_id', businessId)
+
   if (error) throw error
   return data
 }

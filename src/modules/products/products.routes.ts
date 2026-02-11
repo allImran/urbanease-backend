@@ -5,6 +5,7 @@ import { requireRole } from '../../middlewares/role.middleware'
 import { validate } from '../../middlewares/validate.middleware'
 import {
   getProductsHandler,
+  getProductsByBusinessHandler,
   getProductHandler,
   getProductBySlugHandler,
   createProductHandler,
@@ -22,6 +23,7 @@ const router = Router()
 
 // Public Read Access
 router.get('/', getProductsHandler)
+router.get('/business/:businessId', getProductsByBusinessHandler)
 router.get('/slug/:slug', getProductBySlugHandler)
 router.get('/:id', getProductHandler)
 

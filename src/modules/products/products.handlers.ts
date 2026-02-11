@@ -3,6 +3,7 @@ import {
   fetchProducts,
   fetchProductById,
   fetchProductBySlug,
+  fetchProductsByBusinessId,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -17,6 +18,16 @@ import {
 export const getProductsHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await fetchProducts()
+    res.json(products)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const getProductsByBusinessHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { businessId } = req.params
+    const products = await fetchProductsByBusinessId(businessId as string)
     res.json(products)
   } catch (e) {
     next(e)
