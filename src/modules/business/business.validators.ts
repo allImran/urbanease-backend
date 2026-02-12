@@ -2,7 +2,7 @@ import { body } from 'express-validator'
 
 // Base validation rules for business fields (all optional)
 export const businessValidationRules = [
-  body('logo').optional().isURL().withMessage('Logo must be a valid URL'),
+  body('logo').optional().isString(),
   body('slogan').optional().isString(),
   body('primary_color').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Primary color must be a valid hex color (e.g., #FFFFFF)'),
   body('email').optional().isEmail().withMessage('Email must be valid'),
