@@ -143,7 +143,7 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
     //if (phone) {
       // Clean phone number: remove +, spaces, dashes, etc.
       const w_b_n = '8801722454490'
-      const message = `New order received! 🛒\n\nTracing link: https://indoorshopping.web.app/orders/${order.id} \n\nUser Phone: ${phone}`
+      const message = `New order received! 🛒\n\nTracing Order ID: ${order.id}\n\nUser Phone: ${phone}`
 
       // Fire-and-forget: don't await to avoid blocking the response
       sendTextMessage(w_b_n, message)
