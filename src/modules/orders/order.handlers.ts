@@ -146,7 +146,7 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
       const message = `New order received! 🛒\n\nTracing link: https://indoorshopping.web.app/orders/${order.id} \n\nUser Phone: ${phone}`
 
       // Fire-and-forget: don't await to avoid blocking the response
-      sendTextMessage(w_b_n, message)
+      await sendTextMessage(w_b_n, message)
         .catch(error => console.error('Failed to send WhatsApp notification:', error))
     //}
 
