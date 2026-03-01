@@ -3,6 +3,7 @@ import { supabase } from '../../config/supabase'
 import { fetchOrders, fetchOrderById, createOrder, updateOrder, updateOrderWithHistory, fetchOrderStatusHistory, insertStatusHistory } from './order.repo'
 import { fetchProductById } from '../products/products.repo'
 import { OrderItem, OrderStatus } from './order.types'
+import { sendTextMessage } from '../whatsapp/whatsapp.service'
 
 // Helper to derive current status from history (latest entry)
 const deriveCurrentStatus = (history: any[]): OrderStatus | undefined => {
@@ -137,6 +138,17 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
 
     // 4. Record initial status in history
     await insertStatusHistory(order.id, 'pending')
+
+    // 5. Send WhatsApp notification
+    //if (phone) {
+      // Clean phone number: remove +, spaces, dashes, etc.
+      const w_b_n = '8801722454490'
+      const message = `New order received! 🛒\n\nTracing link: https://indoorshopping.web.app/orders/${order.id} \n\nUser Phone: ${phone}`
+
+      // Fire-and-forget: don't await to avoid blocking the response
+      sendTextMessage(w_b_n, message)
+        .catch(error => console.error('Failed to send WhatsApp notification:', error))
+    //}
 
     res.status(201).json(order)
   } catch (e) {
