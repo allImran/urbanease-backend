@@ -8,6 +8,7 @@ import orderRoutes from './modules/orders/order.routes'
 import whatsappRoutes from './modules/whatsapp/whatsapp.routes'
 import tempUserRoutes from './modules/temp-users/temp-user.routes'
 import instantOrderRoutes from './modules/instant-orders/instant-order.routes'
+import steadfastRoutes from './modules/courier/courier.routes'
 
 
 const router = Router()
@@ -21,6 +22,7 @@ router.use('/orders', orderRoutes)
 router.use('/whatsapp', whatsappRoutes)
 router.use('/temp-users', tempUserRoutes)
 router.use('/instant-orders', instantOrderRoutes)
+router.use('/steadfast', steadfastRoutes)
 
 
 export default router
