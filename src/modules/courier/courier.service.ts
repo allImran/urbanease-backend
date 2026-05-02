@@ -1,4 +1,5 @@
 import { env } from '../../config/env'
+import { generateInvoiceNumber } from '../../utils/invoice.util'
 import type {
   SteadfastCreateOrderRequest,
   SteadfastCreateOrderResponse,
@@ -37,25 +38,24 @@ async function makeSteadfastRequest(
 }
 
 export async function createSteadfastOrder(
-  orderData: SteadfastCreateOrderRequest
+  orderData: Partial<SteadfastCreateOrderRequest> & Pick<SteadfastCreateOrderRequest, 'recipient_name' | 'recipient_phone' | 'recipient_address' | 'cod_amount'>
 ): Promise<CreateOrderResponse> {
   try {
-    // Validate required fields
-    if (!orderData.invoice || orderData.invoice.trim() === '') {
-      return {
-        success: false,
-        error: 'Invoice is required'
-      }
+    // Auto-generate invoice if not provided
+    const finalOrderData = {
+      ...orderData,
+      invoice: orderData.invoice || generateInvoiceNumber('SF')
     }
 
-    if (!orderData.recipient_name || orderData.recipient_name.trim() === '') {
+    // Validate required fields
+    if (!finalOrderData.recipient_name || finalOrderData.recipient_name.trim() === '') {
       return {
         success: false,
         error: 'Recipient name is required'
       }
     }
 
-    if (!orderData.recipient_phone || orderData.recipient_phone.trim() === '') {
+    if (!finalOrderData.recipient_phone || finalOrderData.recipient_phone.trim() === '') {
       return {
         success: false,
         error: 'Recipient phone is required'
@@ -64,28 +64,28 @@ export async function createSteadfastOrder(
 
     // Validate phone number format (11 digits)
     const phoneRegex = /^\d{11}$/
-    if (!phoneRegex.test(orderData.recipient_phone)) {
+    if (!phoneRegex.test(finalOrderData.recipient_phone)) {
       return {
         success: false,
         error: 'Recipient phone must be 11 digits'
       }
     }
 
-    if (orderData.alternative_phone && !phoneRegex.test(orderData.alternative_phone)) {
+    if (finalOrderData.alternative_phone && !phoneRegex.test(finalOrderData.alternative_phone)) {
       return {
         success: false,
         error: 'Alternative phone must be 11 digits'
       }
     }
 
-    if (!orderData.recipient_address || orderData.recipient_address.trim() === '') {
+    if (!finalOrderData.recipient_address || finalOrderData.recipient_address.trim() === '') {
       return {
         success: false,
         error: 'Recipient address is required'
       }
     }
 
-    if (orderData.cod_amount < 0) {
+    if (finalOrderData.cod_amount < 0) {
       return {
         success: false,
         error: 'COD amount cannot be less than 0'
@@ -93,7 +93,7 @@ export async function createSteadfastOrder(
     }
 
     // Validate recipient_name length (max 100 characters)
-    if (orderData.recipient_name.length > 100) {
+    if (finalOrderData.recipient_name.length > 100) {
       return {
         success: false,
         error: 'Recipient name cannot exceed 100 characters'
@@ -101,7 +101,7 @@ export async function createSteadfastOrder(
     }
 
     // Validate recipient_address length (max 250 characters)
-    if (orderData.recipient_address.length > 250) {
+    if (finalOrderData.recipient_address.length > 250) {
       return {
         success: false,
         error: 'Recipient address cannot exceed 250 characters'
@@ -109,7 +109,7 @@ export async function createSteadfastOrder(
     }
 
     // Make API call
-    const response = await makeSteadfastRequest('/create_order', 'POST', orderData)
+    const response = await makeSteadfastRequest('/create_order', 'POST', finalOrderData)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -136,7 +136,7 @@ export async function createSteadfastOrder(
 }
 
 export async function createBulkSteadfastOrders(
-  orders: SteadfastCreateOrderRequest[]
+  orders: Array<Partial<SteadfastCreateOrderRequest> & Pick<SteadfastCreateOrderRequest, 'recipient_name' | 'recipient_phone' | 'recipient_address' | 'cod_amount'>>
 ): Promise<BulkOrderResponse> {
   try {
     // Validate orders array
@@ -155,9 +155,15 @@ export async function createBulkSteadfastOrders(
       }
     }
 
+    // Auto-generate invoices for orders that don't have one
+    const finalOrders = orders.map(order => ({
+      ...order,
+      invoice: order.invoice || generateInvoiceNumber('SF')
+    }))
+
     // Make API call with JSON stringified array
     const response = await makeSteadfastRequest('/create_order/bulk-order', 'POST', {
-      data: JSON.stringify(orders)
+      data: JSON.stringify(finalOrders)
     })
 
     if (!response.ok) {

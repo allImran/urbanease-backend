@@ -1,7 +1,7 @@
 // Request Types
 
 export interface CreateOrderRequest {
-  invoice: string
+  invoice?: string
   recipient_name: string
   recipient_phone: string
   recipient_address: string

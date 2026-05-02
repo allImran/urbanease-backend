@@ -2,11 +2,12 @@ import { body, param, query } from 'express-validator'
 
 export const createOrderValidation = [
   body('invoice')
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage('Invoice is required')
     .isLength({ max: 100 })
-    .withMessage('Invoice cannot exceed 100 characters'),
+    .withMessage('Invoice cannot exceed 100 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage('Invoice can only contain alphanumeric characters, hyphens, and underscores'),
   body('recipient_name')
     .trim()
     .notEmpty()
@@ -69,11 +70,12 @@ export const bulkOrderValidation = [
     .isArray({ min: 1, max: 500 })
     .withMessage('Data must be an array with 1-500 items'),
   body('data.*.invoice')
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage('Invoice is required for each order')
     .isLength({ max: 100 })
-    .withMessage('Invoice cannot exceed 100 characters'),
+    .withMessage('Invoice cannot exceed 100 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage('Invoice can only contain alphanumeric characters, hyphens, and underscores'),
   body('data.*.recipient_name')
     .trim()
     .notEmpty()
