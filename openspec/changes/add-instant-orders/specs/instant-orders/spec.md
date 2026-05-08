@@ -106,7 +106,7 @@ The system SHALL allow updating specific order fields while maintaining data int
 
 - **WHEN** a PATCH request is made to `/api/instant-orders/:id` with `status`
 - **THEN** the order status is updated to the new value
-- **AND** the new status must be one of: pending, confirmed, canceled, returned, on_the_way, delivered
+- **AND** the new status must be one of: pending, confirmed, cancelled, returned, on_the_way, delivered
 
 #### Scenario: Update order items
 
@@ -195,7 +195,7 @@ The system SHALL only allow specific status values for instant orders.
 #### Scenario: Valid status values
 
 - **WHEN** setting or updating an order status
-- **THEN** the status must be one of: pending, confirmed, canceled, returned, on_the_way, delivered
+- **THEN** the status must be one of: pending, confirmed, cancelled, returned, on_the_way, delivered
 
 #### Scenario: Invalid status rejection
 

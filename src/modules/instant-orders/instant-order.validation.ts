@@ -50,7 +50,7 @@ export const updateInstantOrderValidation = [
   param('id').isNumeric().withMessage('Invalid instant order ID'),
   body('status')
     .optional()
-    .isIn(['pending', 'confirmed', 'canceled', 'returned', 'on_the_way', 'delivered'])
+    .isIn(['pending', 'confirmed', 'cancelled', 'returned', 'on_the_way', 'delivered'])
     .withMessage('Invalid order status'),
   body('delivery_charge')
     .optional()
@@ -91,7 +91,7 @@ export const listInstantOrdersValidation = [
   query('user_id').optional().isUUID().withMessage('User ID must be a valid UUID'),
   query('status')
     .optional()
-    .isIn(['pending', 'confirmed', 'canceled', 'returned', 'on_the_way', 'delivered'])
+    .isIn(['pending', 'confirmed', 'cancelled', 'returned', 'on_the_way', 'delivered'])
     .withMessage('Invalid order status'),
   query('search')
     .optional()

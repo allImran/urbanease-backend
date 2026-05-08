@@ -1,7 +1,7 @@
 export type InstantOrderStatus =
   | 'pending'
   | 'confirmed'
-  | 'canceled'
+  | 'cancelled'
   | 'returned'
   | 'on_the_way'
   | 'delivered'

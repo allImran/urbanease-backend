@@ -10,6 +10,7 @@ The existing order system (`orders` table) is tightly coupled with Supabase Auth
 ## Goals / Non-Goals
 
 **Goals**:
+
 - Enable rapid order creation without Supabase Auth overhead
 - Provide searchable customer history for repeat customers
 - Maintain data immutability (customer snapshot at order time)
@@ -17,6 +18,7 @@ The existing order system (`orders` table) is tightly coupled with Supabase Auth
 - Keep implementation simple and focused on admin workflow
 
 **Non-Goals**:
+
 - Customer-facing order management (use existing `orders` table)
 - Payment integration (COD only, via `cod_reference`)
 - Shipping calculations (manual `delivery_charge` input)
@@ -46,47 +48,46 @@ src/modules/instant-orders/
 
 ```typescript
 async function resolveOrCreateTempUser(params: {
-  user_id?: string
-  name?: string
-  phone?: string
-  address?: string
-}): Promise<{ temp_user_id: string, customer_info: CustomerInfo }> {
-
+  user_id?: string;
+  name?: string;
+  phone?: string;
+  address?: string;
+}): Promise<{ temp_user_id: string; customer_info: CustomerInfo }> {
   // Path 1: user_id provided - fetch existing (global, no business check)
   if (params.user_id) {
-    const user = await fetchTempUserById(params.user_id)
+    const user = await fetchTempUserById(params.user_id);
     if (!user) {
-      throw new Error('Temp user not found')
+      throw new Error("Temp user not found");
     }
     return {
       temp_user_id: user.id,
       customer_info: {
         name: user.name,
         phone: user.phone,
-        address: user.address
-      }
-    }
+        address: user.address,
+      },
+    };
   }
 
   // Path 2: No user_id - create new temp user (global)
   if (!params.name || !params.phone) {
-    throw new Error('name and phone required when user_id not provided')
+    throw new Error("name and phone required when user_id not provided");
   }
 
   const newUser = await createTempUser({
     name: params.name,
     phone: params.phone,
-    address: params.address || ''
-  })
+    address: params.address || "",
+  });
 
   return {
     temp_user_id: newUser.id,
     customer_info: {
       name: newUser.name,
       phone: newUser.phone,
-      address: newUser.address
-    }
-  }
+      address: newUser.address,
+    },
+  };
 }
 ```
 
@@ -94,11 +95,20 @@ async function resolveOrCreateTempUser(params: {
 
 ```typescript
 async function createInstantOrderHandler(req, res) {
-  const { business_id, user_id, name, phone, address, delivery_charge, cod_reference, order_items } = req.body
+  const {
+    business_id,
+    user_id,
+    name,
+    phone,
+    address,
+    delivery_charge,
+    cod_reference,
+    order_items,
+  } = req.body;
 
   // 1. Validate business_id from JWT
   if (req.user.business_id !== business_id) {
-    return res.status(403).json({ error: 'Forbidden' })
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   // 2. Resolve or create temp user (global lookup)
@@ -106,26 +116,26 @@ async function createInstantOrderHandler(req, res) {
     user_id,
     name,
     phone,
-    address
-  })
+    address,
+  });
 
   // 3. Validate order_items structure
   if (!validateOrderItems(order_items)) {
-    return res.status(400).json({ error: 'Invalid order_items' })
+    return res.status(400).json({ error: "Invalid order_items" });
   }
 
   // 4. Create order with customer snapshot
   const order = await createInstantOrder({
     business_id,
     temp_user_id,
-    customer_info,  // JSONB snapshot - immutable
+    customer_info, // JSONB snapshot - immutable
     delivery_charge,
     cod_reference,
     order_items,
-    status: 'pending'
-  })
+    status: "pending",
+  });
 
-  res.status(201).json(order)
+  res.status(201).json(order);
 }
 ```
 
@@ -160,7 +170,7 @@ CREATE TABLE instant_orders (
     (user_id IS NULL AND temp_user_id IS NOT NULL)
   ),
   CONSTRAINT valid_status CHECK (
-    status IN ('pending', 'confirmed', 'canceled', 'returned', 'on_the_way', 'delivered')
+    status IN ('pending', 'confirmed', 'cancelled', 'returned', 'on_the_way', 'delivered')
   )
 );
 
@@ -180,6 +190,7 @@ CREATE POLICY instant_orders_business_isolation ON instant_orders
 ## API Route Structure
 
 ### Temp Users
+
 ```
 POST   /api/temp-users           - Create temp user (global)
 PATCH  /api/temp-users/:id       - Update temp user
@@ -187,6 +198,7 @@ GET    /api/temp-users/search    - Search by name or phone (global)
 ```
 
 ### Instant Orders
+
 ```
 POST   /api/instant-orders              - Create order
 PATCH  /api/instant-orders/:id          - Update order (status, items, etc.)
@@ -197,6 +209,7 @@ GET    /api/instant-orders/:id          - Get single order
 ## Request/Response Examples
 
 ### Create Temp User
+
 ```bash
 POST /api/temp-users
 {
@@ -207,6 +220,7 @@ POST /api/temp-users
 ```
 
 ### Create Instant Order (with existing user)
+
 ```bash
 POST /api/instant-orders
 {
@@ -221,6 +235,7 @@ POST /api/instant-orders
 ```
 
 ### Create Instant Order (with new customer)
+
 ```bash
 POST /api/instant-orders
 {
@@ -237,6 +252,7 @@ POST /api/instant-orders
 ```
 
 ### Search Orders (customer name/phone)
+
 ```bash
 GET /api/instant-orders?business_id=uuid-123&search=John&status=pending&from=2026-01-01&to=2026-03-31&page=1&limit=20
 ```
@@ -244,11 +260,13 @@ GET /api/instant-orders?business_id=uuid-123&search=John&status=pending&from=202
 ## Controller/Service Layer Responsibilities
 
 ### Temp Users
+
 - **Routes**: Method/path definitions, middleware wiring
 - **Handlers**: Request validation, response formatting, error handling
 - **Repo**: Supabase queries, data transformation
 
 ### Instant Orders
+
 - **Routes**: Method/path definitions, middleware wiring
 - **Handlers**:
   - User resolution orchestration
@@ -263,27 +281,29 @@ GET /api/instant-orders?business_id=uuid-123&search=John&status=pending&from=202
 ## Validation Logic
 
 ### Order Items Schema
+
 ```typescript
 const orderItemSchema = {
-  title: { type: 'string', required: true },
-  price: { type: 'number', min: 0, required: true },
-  quantity: { type: 'number', min: 1, integer: true, required: true },
-  unit: { type: 'string', required: true }
-}
+  title: { type: "string", required: true },
+  price: { type: "number", min: 0, required: true },
+  quantity: { type: "number", min: 1, integer: true, required: true },
+  unit: { type: "string", required: true },
+};
 ```
 
 ### User Logic Validation
+
 ```typescript
 // Either user_id OR (name + phone) must be provided
 if (!user_id && (!name || !phone)) {
-  throw new Error('Either user_id or (name + phone) is required')
+  throw new Error("Either user_id or (name + phone) is required");
 }
 
 // If user_id provided, it must exist (global lookup, no business check)
 if (user_id) {
-  const user = await fetchTempUserById(user_id)
+  const user = await fetchTempUserById(user_id);
   if (!user) {
-    throw new Error('Invalid user_id')
+    throw new Error("Invalid user_id");
   }
 }
 ```
@@ -296,6 +316,7 @@ if (user_id) {
 - **500**: Database errors (logged, generic message to client)
 
 All errors follow centralized error format:
+
 ```json
 {
   "error": "Error type",
@@ -307,20 +328,24 @@ All errors follow centralized error format:
 ## Risks / Trade-offs
 
 ### Data Duplication
+
 - **Risk**: Customer info exists in both `temp_users` and `customer_info` snapshot
 - **Mitigation**: This is intentional - `customer_info` preserves order-time data, `temp_users` maintains current info
 
 ### Search Performance
+
 - **Risk**: JSONB search may be slower with large datasets
 - **Mitigation**: GIN indexes on `customer_info`, consider full-text search if performance issues arise
 
 ### Temp User Proliferation
+
 - **Risk**: Duplicate temp users for same customer (typos in phone/name)
 - **Mitigation**: Search-before-create pattern in UI (future), unique constraint on `phone` (global)
 
 ## Migration Plan
 
 **Steps**:
+
 1. Deploy database migrations (tables, indexes, RLS)
 2. Deploy new modules (temp-users, instant-orders)
 3. Verify business isolation for instant_orders with test data
@@ -328,6 +353,7 @@ All errors follow centralized error format:
 5. Update admin UI to use new endpoints
 
 **Rollback**:
+
 1. Remove route registrations from `src/routes.ts`
 2. Drop `instant_orders` and `temp_users` tables
 3. No data loss (system is additive)

@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS instant_orders (
   ),
   -- Valid order statuses
   CONSTRAINT valid_status CHECK (
-    status IN ('pending', 'confirmed', 'canceled', 'returned', 'on_the_way', 'delivered')
+    status IN ('pending', 'confirmed', 'cancelled', 'returned', 'on_the_way', 'delivered')
   )
 );
 
