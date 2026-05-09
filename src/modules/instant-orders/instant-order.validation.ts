@@ -58,9 +58,9 @@ export const updateInstantOrderValidation = [
     .withMessage('Delivery charge must be a non-negative number'),
   body('cod_reference')
     .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('COD reference must not exceed 100 characters'),
+    .trim(),
+    // .isLength({ max: 100 })
+    // .withMessage('COD reference must not exceed 100 characters'),
   body('order_items')
     .optional()
     .isArray({ min: 1 })
