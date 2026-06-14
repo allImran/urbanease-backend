@@ -209,6 +209,57 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 - **Auth**: Public
 - **Response**: Array of Product objects with nested Category.
 
+### Get Products by Business ID
+
+`GET /products/business/:businessId`
+
+- **Auth**: Public
+- **Params**:
+  - `businessId` (required): Business UUID
+- **Response**: Array of Product objects with nested Category for the specified business.
+
+### Get Product by Slug
+
+`GET /products/slug/:slug`
+
+- **Auth**: Public
+- **Params**:
+  - `slug` (required): Product slug
+- **Response**: Product object with nested Category (with Business) and Variants.
+  ```json
+  {
+    "id": "uuid",
+    "name": "string",
+    "slug": "string",
+    "image_urls": ["string"],
+    "sections": [],
+    "category_id": "uuid",
+    "business_id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+    "category": {
+      "id": "uuid",
+      "name": "string",
+      "business": {
+        "id": "uuid",
+        "name": "string",
+        "slug": "string"
+      }
+    },
+    "variants": [
+      {
+        "id": "uuid",
+        "product_id": "uuid",
+        "sku": "string",
+        "price": 99.99,
+        "attributes": {},
+        "created_at": "timestamp",
+        "updated_at": "timestamp"
+      }
+    ]
+  }
+  ```
+
 ### Get Product by ID
 
 `GET /products/:id`
