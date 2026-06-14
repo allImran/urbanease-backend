@@ -15,10 +15,9 @@ app.use('/api', router)
 app.use(errorMiddleware)
 
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(3003, () => {
-    console.log('Server running on http://localhost:3000')
-  })
-}
+const PORT = process.env.PORT || 3003
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
 
 export default app
