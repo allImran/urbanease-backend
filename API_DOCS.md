@@ -612,6 +612,38 @@ Base URL: `https://urbanease-backend.vercel.app/api`
 - **Valid Status Values**: `pending`, `conducted`, `confirmed`, `paid`, `shipped`, `delivered`, `cancelled`, `returned`, `partially_returned`
 - **Response**: Updated Order object with derived status.
 
+### Request Courier Pickup
+
+`POST /orders/:id/pickup-request`
+
+- **Auth**: Admin, Staff only
+- **Description**: Creates a Steadfast courier consignment for the order and stores the consignment ID in the order's `cod_reference` field. All body fields are optional — defaults are derived from the order: recipient name/phone/address from `shipping_address` (phone falls back to the user's auth phone), COD amount from `total_amount + delivery_charge`, and the order ID is used as the Steadfast invoice. Returns `409` if the order already has a `cod_reference`.
+- **Body** (all optional overrides):
+  ```json
+  {
+    "recipient_name": "John Doe",
+    "recipient_phone": "01712345678",
+    "recipient_address": "123 Main St, Dhaka",
+    "cod_amount": 149.99,
+    "note": "Deliver in the evening",
+    "item_description": "2x T-Shirt",
+    "delivery_type": 0
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "consignment": {
+      "consignment_id": 1424107,
+      "invoice": "order-uuid",
+      "tracking_code": "15BAEB8A",
+      "status": "in_review"
+    },
+    "order": { ... }
+  }
+  ```
+
 ### Update Order
 
 `PATCH /orders/:id`
@@ -623,7 +655,8 @@ Base URL: `https://urbanease-backend.vercel.app/api`
   {
     "total_amount": 149.99,
     "shipping_address": { ... },
-    "payment_intent_id": "pi_1234567890"
+    "payment_intent_id": "pi_1234567890",
+    "cod_reference": "1424107"
   }
   ```
 - **Response**: Updated Order object.

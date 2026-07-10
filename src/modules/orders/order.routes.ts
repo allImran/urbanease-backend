@@ -5,7 +5,8 @@ import { validate } from '../../middlewares/validate.middleware'
 import {
   createOrderValidation,
   updateOrderStatusValidation,
-  updateOrderAdminValidation
+  updateOrderAdminValidation,
+  pickupRequestValidation
 } from './order.validation'
 import {
   getOrdersHandler,
@@ -14,7 +15,8 @@ import {
   createOrderHandler,
   updateOrderStatusHandler,
   updateOrderHandler,
-  getOrderStatusHistoryHandler
+  getOrderStatusHistoryHandler,
+  requestPickupHandler
 } from './order.handlers'
 
 const router = Router()
@@ -65,6 +67,16 @@ router.get(
   authMiddleware,
   requireRole(['admin', 'staff']),
   getBusinessOrdersHandler
+)
+
+// Request Courier Pickup (creates Steadfast consignment, stores cod_reference)
+router.post(
+  '/:id/pickup-request',
+  authMiddleware,
+  requireRole(['admin', 'staff']),
+  pickupRequestValidation,
+  validate,
+  requestPickupHandler
 )
 
 // Update Order Status

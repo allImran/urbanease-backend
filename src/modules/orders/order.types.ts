@@ -25,6 +25,7 @@ export interface Order {
   shipping_address: any;
   payment_intent_id?: string;
   delivery_charge?: number;
+  cod_reference?: string | null;
   created_at: string;
   updated_at: string;
   history?: OrderStatusHistory[];

@@ -4,6 +4,7 @@ import { fetchOrders, fetchOrderById, createOrder, updateOrder, updateOrderWithH
 import { fetchProductById } from '../products/products.repo'
 import { OrderItem, OrderStatus } from './order.types'
 import { sendTextMessage } from '../whatsapp/whatsapp.service'
+import { createSteadfastOrder } from '../courier/courier.service'
 
 // Helper to derive current status from history (latest entry)
 const deriveCurrentStatus = (history: any[]): OrderStatus | undefined => {
@@ -175,6 +176,83 @@ export const updateOrderHandler = async (req: Request, res: Response, next: Next
     const { id } = req.params
     const order = await updateOrder(id as string, req.body)
     res.json(order)
+  } catch (e) {
+    next(e)
+  }
+}
+
+// Normalize phone to the 11-digit local format Steadfast expects (01XXXXXXXXX)
+const normalizePhone = (phone?: string | null): string | undefined => {
+  if (!phone) return undefined
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length === 13 && digits.startsWith('880')) return `0${digits.slice(3)}`
+  return digits
+}
+
+export const requestPickupHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const order = await fetchOrderById(id as string)
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
+    }
+
+    if (order.cod_reference) {
+      return res.status(409).json({
+        message: 'Pickup already requested for this order',
+        cod_reference: order.cod_reference
+      })
+    }
+
+    const address = order.shipping_address || {}
+
+    // Recipient phone: body override > shipping address > auth user phone
+    let recipientPhone = req.body.recipient_phone || address.phone
+    if (!recipientPhone && order.user_id) {
+      const { data } = await supabase.auth.admin.getUserById(order.user_id)
+      recipientPhone = data?.user?.phone || data?.user?.user_metadata?.phone
+    }
+
+    const recipientAddress =
+      req.body.recipient_address ||
+      (typeof address === 'string'
+        ? address
+        : [address.street, address.city, address.state, address.zip, address.country]
+            .filter(Boolean)
+            .join(', '))
+
+    const codAmount =
+      req.body.cod_amount ?? Number(order.total_amount) + (Number(order.delivery_charge) || 0)
+
+    const result = await createSteadfastOrder({
+      invoice: order.id,
+      recipient_name: req.body.recipient_name || address.name || 'Customer',
+      recipient_phone: normalizePhone(recipientPhone) || '',
+      recipient_address: recipientAddress,
+      cod_amount: codAmount,
+      note: req.body.note,
+      item_description: req.body.item_description,
+      delivery_type: req.body.delivery_type
+    })
+
+    if (!result.success) {
+      if (result.error?.includes('Network error')) {
+        return res.status(503).json({
+          error: 'Service unavailable: Unable to connect to Steadfast service'
+        })
+      }
+      return res.status(400).json({ error: result.error })
+    }
+
+    const updatedOrder = await updateOrder(id as string, {
+      cod_reference: String(result.consignment!.consignment_id)
+    })
+
+    res.status(200).json({
+      success: true,
+      consignment: result.consignment,
+      order: updatedOrder
+    })
   } catch (e) {
     next(e)
   }
