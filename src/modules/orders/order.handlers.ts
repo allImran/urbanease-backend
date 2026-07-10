@@ -103,6 +103,7 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
 
     // 2. Price Calculation & Snapshot
     let totalAmount = 0
+    let deliveryCharge = 0
     const orderItems: Partial<OrderItem>[] = []
 
     for (const item of items) {
@@ -118,6 +119,7 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
 
       const price = Number(variant.price)
       totalAmount += price * item.quantity
+      deliveryCharge = Math.max(deliveryCharge, Number(product.delivery_charge) || 0)
 
       orderItems.push({
         product_id: item.product_id,
@@ -133,7 +135,8 @@ export const createOrderHandler = async (req: Request, res: Response, next: Next
       user_id: userId,
       total_amount: totalAmount,
       business_id,
-      shipping_address
+      shipping_address,
+      delivery_charge: deliveryCharge
     }, orderItems)
 
     // 4. Record initial status in history
