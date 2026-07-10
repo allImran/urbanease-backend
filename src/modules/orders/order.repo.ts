@@ -56,9 +56,11 @@ export const createOrder = async (orderData: Partial<Order>, items: Partial<Orde
 }
 
 export const updateOrder = async (id: string, updates: UpdateOrderDTO) => {
+  // updated_at is maintained by the DB trigger where the column exists;
+  // the live orders table may not have it, so don't set it manually
   const { data, error } = await supabase
     .from('orders')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('id', id)
     .select()
     .single()

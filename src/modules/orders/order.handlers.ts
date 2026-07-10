@@ -182,10 +182,11 @@ export const updateOrderHandler = async (req: Request, res: Response, next: Next
 }
 
 // Normalize phone to the 11-digit local format Steadfast expects (01XXXXXXXXX)
+// Handles +8801..., 8801..., 88001... and plain 01... inputs
 const normalizePhone = (phone?: string | null): string | undefined => {
   if (!phone) return undefined
   const digits = phone.replace(/\D/g, '')
-  if (digits.length === 13 && digits.startsWith('880')) return `0${digits.slice(3)}`
+  if (digits.length >= 10) return `0${digits.slice(-10)}`
   return digits
 }
 
@@ -207,7 +208,7 @@ export const requestPickupHandler = async (req: Request, res: Response, next: Ne
     const address = order.shipping_address || {}
 
     // Recipient phone: body override > shipping address > auth user phone
-    let recipientPhone = req.body.recipient_phone || address.phone
+    let recipientPhone = req.body.recipient_phone || address.mobile || address.phone
     if (!recipientPhone && order.user_id) {
       const { data } = await supabase.auth.admin.getUserById(order.user_id)
       recipientPhone = data?.user?.phone || data?.user?.user_metadata?.phone
@@ -217,7 +218,13 @@ export const requestPickupHandler = async (req: Request, res: Response, next: Ne
       req.body.recipient_address ||
       (typeof address === 'string'
         ? address
-        : [address.street, address.city, address.state, address.zip, address.country]
+        : [
+            address.address || address.street,
+            address.city,
+            address.division_name || address.division || address.state,
+            address.zip,
+            address.country
+          ]
             .filter(Boolean)
             .join(', '))
 
@@ -226,7 +233,7 @@ export const requestPickupHandler = async (req: Request, res: Response, next: Ne
 
     const result = await createSteadfastOrder({
       invoice: order.id,
-      recipient_name: req.body.recipient_name || address.name || 'Customer',
+      recipient_name: req.body.recipient_name || address.full_name || address.name || 'Customer',
       recipient_phone: normalizePhone(recipientPhone) || '',
       recipient_address: recipientAddress,
       cod_amount: codAmount,
