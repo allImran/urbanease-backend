@@ -95,9 +95,9 @@ export const listInstantOrdersValidation = [
     .withMessage('Invalid order status'),
   query('search')
     .optional()
-    .trim()
-    .isLength({ min: 2 })
-    .withMessage('Search query must be at least 2 characters'),
+    .trim(),
+    //.isLength({ min: 2 })
+    //.withMessage('Search query must be at least 2 characters'),
   query('from')
     .optional()
     .isISO8601()
